@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="书架" />
+  <meta name="theme-color" content="#ffffff" />
+  <title>书架 · Novel Tracker</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500&family=Noto+Serif+SC:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #ffffff;
+      --bg2: #f7f7f5;
+      --bg3: #f0efeb;
+      --text: #111110;
+      --text2: #6f6d66;
+      --text3: #a8a49e;
+      --border: #e8e6e1;
+      --border2: #d4d1cb;
+      --accent: #111110;
+      --gong: #1a5276;
+      --gong-bg: #eaf1f8;
+      --jj: #6b1f7a;
+      --jj-bg: #f5edf7;
+      --done: #1a6b3a;
+      --done-bg: #edf7f1;
+      --reading: #7a3a1a;
+      --reading-bg: #fdf2ed;
+      --tbr: #5a5a1a;
+      --tbr-bg: #f7f7ed;
+      --radius: 10px;
+      --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    }
+
+    html { font-size: 16px; -webkit-text-size-adjust: 100%; }
+    body {
+      background: var(--bg2);
+      color: var(--text);
+      font-family: 'Geist', system-ui, sans-serif;
+      font-weight: 400;
+      min-height: 100dvh;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    /* ── Layout ── */
+    .app { max-width: 640px; margin: 0 auto; padding: 0 16px 100px; }
+
+    /* ── Header ── */
+    .header {
+      padding: 48px 0 24px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 24px;
+    }
+    .header-top { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 16px; }
+    .logo { font-family: 'Instrument Serif', serif; font-size: 32px; color: var(--text); letter-spacing: -0.5px; }
+    .logo span { font-style: italic; color: var(--text2); font-size: 16px; margin-left: 8px; }
+    .stats { display: flex; gap: 20px; }
+    .stat { text-align: right; }
+    .stat-num { font-family: 'Instrument Serif', serif; font-size: 22px; line-height: 1; color: var(--text); }
+    .stat-label { font-size: 11px; color: var(--text3); margin-top: 2px; letter-spacing: 0.3px; }
+
+    /* ── Add section ── */
+    .add-section { margin-bottom: 20px; }
+    .url-row { display: flex; gap: 8px; }
+    .url-input {
+      flex: 1;
+      background: var(--bg);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius);
+      padding: 11px 14px;
+      font-family: 'Geist', sans-serif;
+      font-size: 14px;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .url-input::placeholder { color: var(--text3); }
+    .url-input:focus { border-color: var(--accent); }
+    .fetch-btn {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      padding: 11px 18px;
+      font-family: 'Geist', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: opacity 0.15s;
+    }
+    .fetch-btn:hover { opacity: 0.85; }
+    .fetch-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .fetch-status {
+      margin-top: 8px;
+      font-size: 13px;
+      color: var(--text2);
+      min-height: 20px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .fetch-status.error { color: #c0392b; }
+    .fetch-status.success { color: var(--done); }
+
+    /* ── Preview card ── */
+    .preview-card {
+      background: var(--bg);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius);
+      padding: 16px;
+      margin-top: 12px;
+      display: none;
+    }
+    .preview-card.show { display: block; }
+    .preview-title { font-family: 'Noto Serif SC', serif; font-size: 17px; font-weight: 500; margin-bottom: 4px; }
+    .preview-meta { font-size: 12px; color: var(--text2); margin-bottom: 12px; display: flex; gap: 8px; flex-wrap: wrap; }
+    .preview-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+    .preview-field label { display: block; font-size: 11px; color: var(--text3); margin-bottom: 3px; letter-spacing: 0.3px; text-transform: uppercase; }
+    .preview-field input, .preview-field select {
+      width: 100%;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 7px 10px;
+      font-family: 'Geist', sans-serif;
+      font-size: 13px;
+      color: var(--text);
+      outline: none;
+    }
+    .preview-field input:focus, .preview-field select:focus { border-color: var(--accent); background: var(--bg); }
+    .preview-field.full { grid-column: 1 / -1; }
+    .notes-field { margin-bottom: 12px; }
+    .notes-field label { display: block; font-size: 11px; color: var(--text3); margin-bottom: 3px; letter-spacing: 0.3px; text-transform: uppercase; }
+    .notes-field textarea {
+      width: 100%;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-family: 'Geist', sans-serif;
+      font-size: 13px;
+      color: var(--text);
+      outline: none;
+      resize: vertical;
+      min-height: 64px;
+      line-height: 1.5;
+    }
+    .notes-field textarea:focus { border-color: var(--accent); background: var(--bg); }
+    .tags-preview { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 12px; }
+    .tag-chip {
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      background: var(--bg3);
+      color: var(--text2);
+      border: 1px solid var(--border);
+    }
+    .star-rating { display: flex; gap: 2px; margin-bottom: 12px; }
+    .star { font-size: 20px; color: var(--border2); cursor: pointer; transition: color 0.1s; line-height: 1; }
+    .star.lit { color: #d4a017; }
+    .preview-actions { display: flex; gap: 8px; justify-content: flex-end; }
+    .btn-ghost { background: none; border: 1px solid var(--border2); border-radius: 6px; padding: 8px 14px; font-family: 'Geist', sans-serif; font-size: 13px; color: var(--text2); cursor: pointer; transition: all 0.1s; }
+    .btn-ghost:hover { border-color: var(--border2); background: var(--bg2); color: var(--text); }
+    .btn-save { background: var(--accent); color: #fff; border: none; border-radius: 6px; padding: 8px 18px; font-family: 'Geist', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; transition: opacity 0.1s; }
+    .btn-save:hover { opacity: 0.85; }
+
+    /* ── Filters ── */
+    .filters { margin-bottom: 16px; display: flex; flex-direction: column; gap: 10px; }
+    .search-input {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 10px 14px;
+      font-family: 'Geist', sans-serif;
+      font-size: 14px;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .search-input::placeholder { color: var(--text3); }
+    .search-input:focus { border-color: var(--accent); }
+    .pill-row { display: flex; gap: 6px; flex-wrap: wrap; }
+    .pill {
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      border: 1px solid var(--border2);
+      background: var(--bg);
+      color: var(--text2);
+      cursor: pointer;
+      font-family: 'Geist', sans-serif;
+      transition: all 0.12s;
+    }
+    .pill:hover { background: var(--bg3); }
+    .pill.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+    /* ── Novel list ── */
+    .novel-list { display: flex; flex-direction: column; gap: 8px; }
+
+    .novel-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: var(--shadow);
+      transition: border-color 0.15s;
+    }
+    .novel-card:hover { border-color: var(--border2); }
+
+    .card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+    .card-title { font-family: 'Noto Serif SC', serif; font-size: 15px; font-weight: 500; line-height: 1.4; color: var(--text); }
+    .card-title a { color: inherit; text-decoration: none; }
+    .card-title a:hover { text-decoration: underline; }
+    .card-actions { display: flex; gap: 4px; flex-shrink: 0; }
+    .icon-btn {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 11px;
+      color: var(--text3);
+      cursor: pointer;
+      font-family: 'Geist', sans-serif;
+      transition: all 0.1s;
+      white-space: nowrap;
+    }
+    .icon-btn:hover { background: var(--bg2); color: var(--text); border-color: var(--border2); }
+    .icon-btn.danger:hover { background: #fef2f2; color: #c0392b; border-color: #fca5a5; }
+
+    .card-meta { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-bottom: 8px; }
+    .badge {
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.2px;
+    }
+    .badge.gong { background: var(--gong-bg); color: var(--gong); }
+    .badge.jj { background: var(--jj-bg); color: var(--jj); }
+    .badge.done { background: var(--done-bg); color: var(--done); }
+    .badge.reading { background: var(--reading-bg); color: var(--reading); }
+    .badge.tbr { background: var(--tbr-bg); color: var(--tbr); }
+    .meta-dot { width: 3px; height: 3px; border-radius: 50%; background: var(--border2); flex-shrink: 0; }
+    .meta-text { font-size: 12px; color: var(--text2); }
+
+    .card-stats { display: flex; gap: 16px; margin-bottom: 8px; }
+    .stat-item { font-size: 12px; color: var(--text2); }
+    .stat-item strong { color: var(--text); font-weight: 500; }
+
+    .card-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px; }
+    .card-notes { font-size: 13px; color: var(--text2); line-height: 1.6; padding-top: 8px; border-top: 1px solid var(--border); margin-top: 4px; }
+    .card-rating { font-size: 13px; color: #d4a017; letter-spacing: 1px; }
+
+    .edit-form { border-top: 1px solid var(--border); margin-top: 12px; padding-top: 12px; display: none; }
+    .edit-form.show { display: block; }
+    .edit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+    .edit-grid input, .edit-grid select {
+      width: 100%; background: var(--bg2); border: 1px solid var(--border); border-radius: 6px;
+      padding: 7px 10px; font-family: 'Geist', sans-serif; font-size: 13px; color: var(--text); outline: none;
+    }
+    .edit-grid input:focus, .edit-grid select:focus { border-color: var(--accent); background: var(--bg); }
+    .edit-grid .full { grid-column: 1/-1; }
+    .edit-form textarea {
+      width: 100%; background: var(--bg2); border: 1px solid var(--border); border-radius: 6px;
+      padding: 8px 10px; font-family: 'Geist', sans-serif; font-size: 13px; color: var(--text); outline: none;
+      resize: vertical; min-height: 56px; margin-bottom: 8px;
+    }
+    .edit-form textarea:focus { border-color: var(--accent); background: var(--bg); }
+    .edit-actions { display: flex; gap: 6px; justify-content: flex-end; }
+
+    .empty-state { text-align: center; padding: 60px 20px; color: var(--text3); }
+    .empty-icon { font-family: 'Instrument Serif', serif; font-size: 48px; font-style: italic; color: var(--border2); margin-bottom: 12px; }
+    .empty-text { font-size: 14px; line-height: 1.6; }
+
+    /* ── Spinner ── */
+    .spinner {
+      width: 14px; height: 14px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      flex-shrink: 0;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Divider labels ── */
+    .section-label {
+      font-size: 11px;
+      color: var(--text3);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      padding: 4px 0 8px;
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <header class="header">
+    <div class="header-top">
+      <div class="logo">书架 <span>Novel Tracker</span></div>
+      <div class="stats" id="headerStats"></div>
+    </div>
+  </header>
+
+  <!-- Add via URL -->
+  <div class="add-section">
+    <div class="url-row">
+      <input class="url-input" id="urlInput" type="url"
+        placeholder="Paste a GongZiCP or JJWXC novel URL…"
+        onkeydown="if(event.key==='Enter')fetchNovel()" />
+      <button class="fetch-btn" id="fetchBtn" onclick="fetchNovel()">Fetch</button>
+    </div>
+    <div class="fetch-status" id="fetchStatus"></div>
+    <div class="preview-card" id="previewCard"></div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters">
+    <input class="search-input" id="searchInput" placeholder="Search title or author…" oninput="renderList()" />
+    <div class="pill-row" id="tabPills"></div>
+    <div class="pill-row" id="platformPills"></div>
+  </div>
+
+  <!-- List -->
+  <div class="novel-list" id="novelList"></div>
+
+</div>
+
+<script>
+const API_BASE = '/api/scrape';
+
+let novels = JSON.parse(localStorage.getItem('novels_v2') || 'null');
+if (!novels) {
+  novels = [
+    { id: 1, title: '谋杀官员的正确方式', author: 'priest', platform: 'jj', status: 'done', rating: 5, wordCount: '约50万字', chapterCount: '116', tags: ['古代', '玄幻', 'BL'], notes: 'Priest at her best. The political intrigue is so satisfying.', sourceUrl: '' },
+    { id: 2, title: '杀破狼', author: 'priest', platform: 'jj', status: 'done', rating: 5, wordCount: '约120万字', chapterCount: '200', tags: ['古代', '军事', 'BL'], notes: '', sourceUrl: '' },
+    { id: 3, title: '默读', author: 'priest', platform: 'jj', status: 'reading', rating: 0, wordCount: '约90万字', chapterCount: '155', tags: ['现代', '悬疑', 'BL'], notes: 'Currently on chapter 40. The slow burn is so real.', sourceUrl: '' },
+  ];
+  save();
+}
+
+let tab = 'all';
+let platform = 'all';
+let editingId = null;
+let pendingRating = 0;
+
+function save() { localStorage.setItem('novels_v2', JSON.stringify(novels)); }
+
+// ── Tabs & pills ──
+function renderControls() {
+  const tabs = [
+    { key: 'all', label: 'All' },
+    { key: 'reading', label: 'Reading' },
+    { key: 'done', label: 'Finished' },
+    { key: 'tbr', label: 'To Read' },
+  ];
+  document.getElementById('tabPills').innerHTML = tabs.map(t =>
+    `<button class="pill${tab === t.key ? ' active' : ''}" onclick="setTab('${t.key}')">${t.label}</button>`
+  ).join('');
+
+  const platforms = [
+    { key: 'all', label: 'All sources' },
+    { key: 'gong', label: 'GongZiCP' },
+    { key: 'jj', label: 'JJWXC' },
+  ];
+  document.getElementById('platformPills').innerHTML = platforms.map(p =>
+    `<button class="pill${platform === p.key ? ' active' : ''}" onclick="setPlatform('${p.key}')">${p.label}</button>`
+  ).join('');
+}
+function setTab(t) { tab = t; renderControls(); renderList(); }
+function setPlatform(p) { platform = p; renderControls(); renderList(); }
+
+// ── Header stats ──
+function renderStats() {
+  const done = novels.filter(n => n.status === 'done').length;
+  const reading = novels.filter(n => n.status === 'reading').length;
+  const tbr = novels.filter(n => n.status === 'tbr').length;
+  document.getElementById('headerStats').innerHTML = `
+    <div class="stat"><div class="stat-num">${done}</div><div class="stat-label">finished</div></div>
+    <div class="stat"><div class="stat-num">${reading}</div><div class="stat-label">reading</div></div>
+    <div class="stat"><div class="stat-num">${tbr}</div><div class="stat-label">to read</div></div>
+  `;
+}
+
+// ── Fetch from URL ──
+async function fetchNovel() {
+  const url = document.getElementById('urlInput').value.trim();
+  if (!url) return;
+  const btn = document.getElementById('fetchBtn');
+  const status = document.getElementById('fetchStatus');
+  const preview = document.getElementById('previewCard');
+
+  btn.disabled = true;
+  status.className = 'fetch-status';
+  status.innerHTML = '<div class="spinner"></div> Fetching novel data…';
+  preview.className = 'preview-card';
+
+  try {
+    const res = await fetch(`${API_BASE}?url=${encodeURIComponent(url)}`);
+    const data = await res.json();
+    if (!res.ok || !data.success) throw new Error(data.error || 'Failed to fetch');
+
+    status.className = 'fetch-status success';
+    status.textContent = '✓ Novel data fetched — review and save below';
+    pendingRating = 0;
+    showPreview(data);
+  } catch (err) {
+    status.className = 'fetch-status error';
+    status.textContent = '✗ ' + (err.message || 'Could not fetch. Try a different URL.');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function showPreview(data) {
+  const preview = document.getElementById('previewCard');
+  const tagsHtml = (data.tags || []).map(t => `<span class="tag-chip">${t}</span>`).join('');
+  preview.innerHTML = `
+    <div class="preview-title">${data.title || ''}</div>
+    <div class="preview-meta">
+      <span class="badge ${data.platform}">${data.platform === 'gong' ? 'GongZiCP' : 'JJWXC'}</span>
+      ${data.author ? `<span>${data.author}</span>` : ''}
+    </div>
+    ${tagsHtml ? `<div class="tags-preview">${tagsHtml}</div>` : ''}
+    <div class="preview-fields">
+      <div class="preview-field">
+        <label>Title</label>
+        <input id="pv_title" value="${esc(data.title || '')}" />
+      </div>
+      <div class="preview-field">
+        <label>Author</label>
+        <input id="pv_author" value="${esc(data.author || '')}" />
+      </div>
+      <div class="preview-field">
+        <label>Word Count</label>
+        <input id="pv_words" value="${esc(data.wordCount || '')}" />
+      </div>
+      <div class="preview-field">
+        <label>Chapters</label>
+        <input id="pv_chapters" value="${esc(data.chapterCount || '')}" />
+      </div>
+      <div class="preview-field">
+        <label>Tags (comma-separated)</label>
+        <input id="pv_tags" class="full" value="${esc((data.tags || []).join(', '))}" />
+      </div>
+      <div class="preview-field">
+        <label>Status</label>
+        <select id="pv_status">
+          <option value="tbr">To Read</option>
+          <option value="reading">Currently Reading</option>
+          <option value="done">Finished</option>
+        </select>
+      </div>
+    </div>
+    <div class="notes-field">
+      <label>Your Notes</label>
+      <textarea id="pv_notes" placeholder="Thoughts, favourite quotes, why you loved it…"></textarea>
+    </div>
+    <div style="font-size:11px;color:var(--text3);margin-bottom:6px;letter-spacing:0.3px;text-transform:uppercase">Rating</div>
+    <div class="star-rating" id="pv_stars">
+      ${[1,2,3,4,5].map(v => `<span class="star" data-v="${v}" onclick="setPendingRating(${v})">★</span>`).join('')}
+    </div>
+    <div class="preview-actions">
+      <button class="btn-ghost" onclick="closePreview()">Cancel</button>
+      <button class="btn-save" onclick="saveFromPreview('${data.platform}','${esc(data.sourceUrl || '')}')">Add to shelf</button>
+    </div>
+  `;
+  preview.className = 'preview-card show';
+}
+
+function setPendingRating(v) {
+  pendingRating = v;
+  document.querySelectorAll('#pv_stars .star').forEach(s => s.classList.toggle('lit', +s.dataset.v <= v));
+}
+
+function closePreview() {
+  document.getElementById('previewCard').className = 'preview-card';
+  document.getElementById('fetchStatus').innerHTML = '';
+  document.getElementById('urlInput').value = '';
+}
+
+function saveFromPreview(platform, sourceUrl) {
+  const tags = document.getElementById('pv_tags').value.split(',').map(t => t.trim()).filter(Boolean);
+  novels.unshift({
+    id: Date.now(),
+    title: document.getElementById('pv_title').value.trim(),
+    author: document.getElementById('pv_author').value.trim(),
+    platform,
+    status: document.getElementById('pv_status').value,
+    rating: pendingRating,
+    wordCount: document.getElementById('pv_words').value.trim(),
+    chapterCount: document.getElementById('pv_chapters').value.trim(),
+    tags,
+    notes: document.getElementById('pv_notes').value.trim(),
+    sourceUrl,
+  });
+  save();
+  closePreview();
+  render();
+}
+
+// ── Novel list ──
+function renderList() {
+  const q = (document.getElementById('searchInput').value || '').toLowerCase();
+  const list = novels.filter(n => {
+    if (tab !== 'all' && n.status !== tab) return false;
+    if (platform !== 'all' && n.platform !== platform) return false;
+    if (q && !n.title.toLowerCase().includes(q) && !(n.author || '').toLowerCase().includes(q)) return false;
+    return true;
+  });
+
+  const el = document.getElementById('novelList');
+  if (!list.length) {
+    el.innerHTML = `<div class="empty-state"><div class="empty-icon">空</div><div class="empty-text">${q ? 'No results found.' : 'Nothing here yet.<br>Paste a URL above to add your first novel.'}</div></div>`;
+    return;
+  }
+
+  el.innerHTML = list.map(n => novelCardHtml(n)).join('');
+}
+
+function novelCardHtml(n) {
+  const statusLabel = { done: 'Finished', reading: 'Reading', tbr: 'To Read' }[n.status] || n.status;
+  const platformLabel = n.platform === 'gong' ? 'GongZiCP' : 'JJWXC';
+  const isEditing = editingId === n.id;
+
+  const statsHtml = (n.wordCount || n.chapterCount) ? `
+    <div class="card-stats">
+      ${n.wordCount ? `<div class="stat-item"><strong>${n.wordCount}</strong> words</div>` : ''}
+      ${n.chapterCount ? `<div class="stat-item"><strong>${n.chapterCount}</strong> chapters</div>` : ''}
+    </div>` : '';
+
+  const tagsHtml = (n.tags && n.tags.length) ? `
+    <div class="card-tags">${n.tags.map(t => `<span class="tag-chip">${t}</span>`).join('')}</div>` : '';
+
+  const notesHtml = n.notes ? `<div class="card-notes">${n.notes}</div>` : '';
+  const ratingHtml = n.rating ? `<div class="card-rating">${'★'.repeat(n.rating)}${'☆'.repeat(5 - n.rating)}</div>` : '';
+
+  const editHtml = isEditing ? `
+    <div class="edit-form show">
+      <div class="edit-grid">
+        <div><input id="e_title_${n.id}" value="${esc(n.title)}" placeholder="Title" /></div>
+        <div><input id="e_author_${n.id}" value="${esc(n.author || '')}" placeholder="Author" /></div>
+        <div><input id="e_words_${n.id}" value="${esc(n.wordCount || '')}" placeholder="Word count" /></div>
+        <div><input id="e_chapters_${n.id}" value="${esc(n.chapterCount || '')}" placeholder="Chapters" /></div>
+        <div class="full"><input id="e_tags_${n.id}" value="${esc((n.tags || []).join(', '))}" placeholder="Tags, comma-separated" /></div>
+        <div>
+          <select id="e_platform_${n.id}">
+            <option value="gong"${n.platform === 'gong' ? ' selected' : ''}>GongZiCP</option>
+            <option value="jj"${n.platform === 'jj' ? ' selected' : ''}>JJWXC</option>
+          </select>
+        </div>
+        <div>
+          <select id="e_status_${n.id}">
+            <option value="tbr"${n.status === 'tbr' ? ' selected' : ''}>To Read</option>
+            <option value="reading"${n.status === 'reading' ? ' selected' : ''}>Reading</option>
+            <option value="done"${n.status === 'done' ? ' selected' : ''}>Finished</option>
+          </select>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:4px;letter-spacing:0.3px;text-transform:uppercase">Rating</div>
+      <div class="star-rating" id="e_stars_${n.id}" style="margin-bottom:10px">
+        ${[1,2,3,4,5].map(v => `<span class="star${n.rating >= v ? ' lit' : ''}" data-v="${v}" onclick="setEditRating(${n.id},${v})">★</span>`).join('')}
+      </div>
+      <textarea id="e_notes_${n.id}" placeholder="Notes…">${esc(n.notes || '')}</textarea>
+      <div class="edit-actions">
+        <button class="btn-ghost" onclick="cancelEdit()">Cancel</button>
+        <button class="btn-save" onclick="saveEdit(${n.id})">Save</button>
+      </div>
+    </div>` : '';
+
+  return `
+  <div class="novel-card" id="card_${n.id}">
+    <div class="card-top">
+      <div class="card-title">${n.sourceUrl ? `<a href="${n.sourceUrl}" target="_blank">${n.title}</a>` : n.title}</div>
+      <div class="card-actions">
+        <button class="icon-btn" onclick="startEdit(${n.id})">Edit</button>
+        <button class="icon-btn danger" onclick="deleteNovel(${n.id})">Delete</button>
+      </div>
+    </div>
+    <div class="card-meta">
+      <span class="badge ${n.platform}">${platformLabel}</span>
+      <span class="badge ${n.status}">${statusLabel}</span>
+      ${n.author ? `<span class="meta-dot"></span><span class="meta-text">${n.author}</span>` : ''}
+    </div>
+    ${ratingHtml}
+    ${statsHtml}
+    ${tagsHtml}
+    ${notesHtml}
+    ${editHtml}
+  </div>`;
+}
+
+function setEditRating(id, v) {
+  document.querySelectorAll(`#e_stars_${id} .star`).forEach(s => s.classList.toggle('lit', +s.dataset.v <= v));
+}
+function startEdit(id) { editingId = id; renderList(); }
+function cancelEdit() { editingId = null; renderList(); }
+function saveEdit(id) {
+  const n = novels.find(n => n.id === id);
+  n.title = document.getElementById(`e_title_${id}`).value.trim() || n.title;
+  n.author = document.getElementById(`e_author_${id}`).value.trim();
+  n.wordCount = document.getElementById(`e_words_${id}`).value.trim();
+  n.chapterCount = document.getElementById(`e_chapters_${id}`).value.trim();
+  n.tags = document.getElementById(`e_tags_${id}`).value.split(',').map(t => t.trim()).filter(Boolean);
+  n.platform = document.getElementById(`e_platform_${id}`).value;
+  n.status = document.getElementById(`e_status_${id}`).value;
+  n.notes = document.getElementById(`e_notes_${id}`).value.trim();
+  const litStar = [...document.querySelectorAll(`#e_stars_${id} .star.lit`)].pop();
+  n.rating = litStar ? +litStar.dataset.v : 0;
+  save();
+  editingId = null;
+  render();
+}
+function deleteNovel(id) {
+  if (!confirm('Remove this novel from your shelf?')) return;
+  novels = novels.filter(n => n.id !== id);
+  save();
+  render();
+}
+
+function esc(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function render() { renderStats(); renderControls(); renderList(); }
+render();
+</script>
+</body>
+</html>
