@@ -10,240 +10,103 @@
   <title>书架 · Novel Tracker</title>
   <link rel="manifest" href="manifest.json" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500&family=Noto+Serif+SC:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500&family=Noto+Serif+SC:wght@400;500&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
-      --bg: #ffffff;
-      --bg2: #f7f7f5;
-      --bg3: #f0efeb;
-      --text: #111110;
-      --text2: #6f6d66;
-      --text3: #a8a49e;
-      --border: #e8e6e1;
-      --border2: #d4d1cb;
-      --accent: #111110;
-      --gong: #1a5276;
-      --gong-bg: #eaf1f8;
-      --jj: #6b1f7a;
-      --jj-bg: #f5edf7;
-      --done: #1a6b3a;
-      --done-bg: #edf7f1;
-      --reading: #7a3a1a;
-      --reading-bg: #fdf2ed;
-      --tbr: #5a5a1a;
-      --tbr-bg: #f7f7ed;
-      --radius: 10px;
-      --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+      --bg: #ffffff; --bg2: #f7f7f5; --bg3: #f0efeb;
+      --text: #111110; --text2: #6f6d66; --text3: #a8a49e;
+      --border: #e8e6e1; --border2: #d4d1cb; --accent: #111110;
+      --gong: #1a5276; --gong-bg: #eaf1f8;
+      --jj: #6b1f7a; --jj-bg: #f5edf7;
+      --done: #1a6b3a; --done-bg: #edf7f1;
+      --reading: #7a3a1a; --reading-bg: #fdf2ed;
+      --tbr: #5a5a1a; --tbr-bg: #f7f7ed;
+      --radius: 10px; --shadow: 0 1px 3px rgba(0,0,0,0.06);
     }
-
     html { font-size: 16px; -webkit-text-size-adjust: 100%; }
-    body {
-      background: var(--bg2);
-      color: var(--text);
-      font-family: 'Geist', system-ui, sans-serif;
-      font-weight: 400;
-      min-height: 100dvh;
-      padding-bottom: env(safe-area-inset-bottom);
-    }
-
-    /* ── Layout ── */
+    body { background: var(--bg2); color: var(--text); font-family: 'Geist', system-ui, sans-serif; min-height: 100dvh; padding-bottom: env(safe-area-inset-bottom); }
     .app { max-width: 640px; margin: 0 auto; padding: 0 16px 100px; }
 
+    /* ── Nav tabs ── */
+    .nav { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 0; padding-top: 48px; }
+    .nav-tab { padding: 10px 20px; font-family: 'Geist', sans-serif; font-size: 13px; font-weight: 500; color: var(--text3); background: none; border: none; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.15s; letter-spacing: 0.2px; }
+    .nav-tab.active { color: var(--text); border-bottom-color: var(--accent); }
+    .nav-tab:hover:not(.active) { color: var(--text2); }
+
     /* ── Header ── */
-    .header {
-      padding: 48px 0 24px;
-      border-bottom: 1px solid var(--border);
-      margin-bottom: 24px;
-    }
-    .header-top { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 16px; }
-    .logo { font-family: 'Instrument Serif', serif; font-size: 32px; color: var(--text); letter-spacing: -0.5px; }
-    .logo span { font-style: italic; color: var(--text2); font-size: 16px; margin-left: 8px; }
-    .stats { display: flex; gap: 20px; }
-    .stat { text-align: right; }
-    .stat-num { font-family: 'Instrument Serif', serif; font-size: 22px; line-height: 1; color: var(--text); }
-    .stat-label { font-size: 11px; color: var(--text3); margin-top: 2px; letter-spacing: 0.3px; }
+    .header { padding: 0 0 24px; margin-bottom: 24px; }
+    .header-top { display: flex; align-items: flex-end; justify-content: space-between; padding-top: 28px; }
+    .logo { font-family: "Geist", sans-serif; font-size: 24px; font-weight: 500; letter-spacing: -0.5px; }
+    .logo span { color: var(--text2); font-size: 16px; margin-left: 8px; }
+    .hstats { display: flex; gap: 20px; }
+    .hstat { text-align: right; }
+    .hstat-num { font-family: 'Geist', sans-serif; font-size: 22px; font-weight: 300; line-height: 1; }
+    .hstat-label { font-size: 11px; color: var(--text3); margin-top: 2px; }
+
+    /* ── Page sections ── */
+    .page { display: none; } .page.active { display: block; }
 
     /* ── Add section ── */
     .add-section { margin-bottom: 20px; }
     .url-row { display: flex; gap: 8px; }
-    .url-input {
-      flex: 1;
-      background: var(--bg);
-      border: 1px solid var(--border2);
-      border-radius: var(--radius);
-      padding: 11px 14px;
-      font-family: 'Geist', sans-serif;
-      font-size: 14px;
-      color: var(--text);
-      outline: none;
-      transition: border-color 0.15s;
-    }
+    .url-input { flex: 1; background: var(--bg); border: 1px solid var(--border2); border-radius: var(--radius); padding: 11px 14px; font-family: 'Geist', sans-serif; font-size: 14px; color: var(--text); outline: none; transition: border-color 0.15s; }
     .url-input::placeholder { color: var(--text3); }
     .url-input:focus { border-color: var(--accent); }
-    .fetch-btn {
-      background: var(--accent);
-      color: #fff;
-      border: none;
-      border-radius: var(--radius);
-      padding: 11px 18px;
-      font-family: 'Geist', sans-serif;
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: opacity 0.15s;
-    }
-    .fetch-btn:hover { opacity: 0.85; }
-    .fetch-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-
-    .fetch-status {
-      margin-top: 8px;
-      font-size: 13px;
-      color: var(--text2);
-      min-height: 20px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .fetch-status.error { color: #c0392b; }
-    .fetch-status.success { color: var(--done); }
+    .fetch-btn { background: var(--accent); color: #fff; border: none; border-radius: var(--radius); padding: 11px 18px; font-family: 'Geist', sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; white-space: nowrap; transition: opacity 0.15s; }
+    .fetch-btn:hover { opacity: 0.85; } .fetch-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .fetch-status { margin-top: 8px; font-size: 13px; color: var(--text2); min-height: 20px; display: flex; align-items: center; gap: 6px; }
+    .fetch-status.error { color: #c0392b; } .fetch-status.success { color: var(--done); }
 
     /* ── Preview card ── */
-    .preview-card {
-      background: var(--bg);
-      border: 1px solid var(--border2);
-      border-radius: var(--radius);
-      padding: 16px;
-      margin-top: 12px;
-      display: none;
-    }
+    .preview-card { background: var(--bg); border: 1px solid var(--border2); border-radius: var(--radius); padding: 16px; margin-top: 12px; display: none; }
     .preview-card.show { display: block; }
     .preview-title { font-family: 'Noto Serif SC', serif; font-size: 17px; font-weight: 500; margin-bottom: 4px; }
     .preview-meta { font-size: 12px; color: var(--text2); margin-bottom: 12px; display: flex; gap: 8px; flex-wrap: wrap; }
     .preview-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
     .preview-field label { display: block; font-size: 11px; color: var(--text3); margin-bottom: 3px; letter-spacing: 0.3px; text-transform: uppercase; }
-    .preview-field input, .preview-field select {
-      width: 100%;
-      background: var(--bg2);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 7px 10px;
-      font-family: 'Geist', sans-serif;
-      font-size: 13px;
-      color: var(--text);
-      outline: none;
-    }
+    .preview-field input, .preview-field select { width: 100%; background: var(--bg2); border: 1px solid var(--border); border-radius: 6px; padding: 7px 10px; font-family: 'Geist', sans-serif; font-size: 13px; color: var(--text); outline: none; }
     .preview-field input:focus, .preview-field select:focus { border-color: var(--accent); background: var(--bg); }
     .preview-field.full { grid-column: 1 / -1; }
     .notes-field { margin-bottom: 12px; }
     .notes-field label { display: block; font-size: 11px; color: var(--text3); margin-bottom: 3px; letter-spacing: 0.3px; text-transform: uppercase; }
-    .notes-field textarea {
-      width: 100%;
-      background: var(--bg2);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 8px 10px;
-      font-family: 'Geist', sans-serif;
-      font-size: 13px;
-      color: var(--text);
-      outline: none;
-      resize: vertical;
-      min-height: 64px;
-      line-height: 1.5;
-    }
+    .notes-field textarea { width: 100%; background: var(--bg2); border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; font-family: 'Geist', sans-serif; font-size: 13px; color: var(--text); outline: none; resize: vertical; min-height: 64px; line-height: 1.5; }
     .notes-field textarea:focus { border-color: var(--accent); background: var(--bg); }
     .tags-preview { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 12px; }
-    .tag-chip {
-      padding: 3px 8px;
-      border-radius: 4px;
-      font-size: 11px;
-      background: var(--bg3);
-      color: var(--text2);
-      border: 1px solid var(--border);
-    }
+    .tag-chip { padding: 3px 8px; border-radius: 4px; font-size: 11px; background: var(--bg3); color: var(--text2); border: 1px solid var(--border); }
     .star-rating { display: flex; gap: 2px; margin-bottom: 12px; }
     .star { font-size: 20px; color: var(--border2); cursor: pointer; transition: color 0.1s; line-height: 1; }
     .star.lit { color: #d4a017; }
     .preview-actions { display: flex; gap: 8px; justify-content: flex-end; }
     .btn-ghost { background: none; border: 1px solid var(--border2); border-radius: 6px; padding: 8px 14px; font-family: 'Geist', sans-serif; font-size: 13px; color: var(--text2); cursor: pointer; transition: all 0.1s; }
-    .btn-ghost:hover { border-color: var(--border2); background: var(--bg2); color: var(--text); }
+    .btn-ghost:hover { background: var(--bg2); color: var(--text); }
     .btn-save { background: var(--accent); color: #fff; border: none; border-radius: 6px; padding: 8px 18px; font-family: 'Geist', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; transition: opacity 0.1s; }
     .btn-save:hover { opacity: 0.85; }
 
     /* ── Filters ── */
     .filters { margin-bottom: 16px; display: flex; flex-direction: column; gap: 10px; }
-    .search-input {
-      width: 100%;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 10px 14px;
-      font-family: 'Geist', sans-serif;
-      font-size: 14px;
-      color: var(--text);
-      outline: none;
-      transition: border-color 0.15s;
-    }
+    .search-input { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 14px; font-family: 'Geist', sans-serif; font-size: 14px; color: var(--text); outline: none; }
     .search-input::placeholder { color: var(--text3); }
     .search-input:focus { border-color: var(--accent); }
     .pill-row { display: flex; gap: 6px; flex-wrap: wrap; }
-    .pill {
-      padding: 5px 12px;
-      border-radius: 20px;
-      font-size: 12px;
-      border: 1px solid var(--border2);
-      background: var(--bg);
-      color: var(--text2);
-      cursor: pointer;
-      font-family: 'Geist', sans-serif;
-      transition: all 0.12s;
-    }
+    .pill { padding: 5px 12px; border-radius: 20px; font-size: 12px; border: 1px solid var(--border2); background: var(--bg); color: var(--text2); cursor: pointer; font-family: 'Geist', sans-serif; transition: all 0.12s; }
     .pill:hover { background: var(--bg3); }
     .pill.active { background: var(--accent); color: #fff; border-color: var(--accent); }
 
-    /* ── Novel list ── */
+    /* ── Novel cards ── */
     .novel-list { display: flex; flex-direction: column; gap: 8px; }
-
-    .novel-card {
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 16px;
-      box-shadow: var(--shadow);
-      transition: border-color 0.15s;
-    }
+    .novel-card { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow); transition: border-color 0.15s; }
     .novel-card:hover { border-color: var(--border2); }
-
     .card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
-    .card-title { font-family: 'Noto Serif SC', serif; font-size: 15px; font-weight: 500; line-height: 1.4; color: var(--text); }
+    .card-title { font-family: 'Noto Serif SC', serif; font-size: 15px; font-weight: 500; line-height: 1.4; }
     .card-title a { color: inherit; text-decoration: none; }
     .card-title a:hover { text-decoration: underline; }
     .card-actions { display: flex; gap: 4px; flex-shrink: 0; }
-    .icon-btn {
-      background: none;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 4px 8px;
-      font-size: 11px;
-      color: var(--text3);
-      cursor: pointer;
-      font-family: 'Geist', sans-serif;
-      transition: all 0.1s;
-      white-space: nowrap;
-    }
+    .icon-btn { background: none; border: 1px solid var(--border); border-radius: 6px; padding: 4px 8px; font-size: 11px; color: var(--text3); cursor: pointer; font-family: 'Geist', sans-serif; transition: all 0.1s; }
     .icon-btn:hover { background: var(--bg2); color: var(--text); border-color: var(--border2); }
     .icon-btn.danger:hover { background: #fef2f2; color: #c0392b; border-color: #fca5a5; }
-
     .card-meta { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-bottom: 8px; }
-    .badge {
-      padding: 2px 8px;
-      border-radius: 4px;
-      font-size: 11px;
-      font-weight: 500;
-      letter-spacing: 0.2px;
-    }
+    .badge { padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; }
     .badge.gong { background: var(--gong-bg); color: var(--gong); }
     .badge.jj { background: var(--jj-bg); color: var(--jj); }
     .badge.done { background: var(--done-bg); color: var(--done); }
@@ -251,230 +114,239 @@
     .badge.tbr { background: var(--tbr-bg); color: var(--tbr); }
     .meta-dot { width: 3px; height: 3px; border-radius: 50%; background: var(--border2); flex-shrink: 0; }
     .meta-text { font-size: 12px; color: var(--text2); }
-
     .card-stats { display: flex; gap: 16px; margin-bottom: 8px; }
     .stat-item { font-size: 12px; color: var(--text2); }
     .stat-item strong { color: var(--text); font-weight: 500; }
-
     .card-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px; }
     .card-notes { font-size: 13px; color: var(--text2); line-height: 1.6; padding-top: 8px; border-top: 1px solid var(--border); margin-top: 4px; }
-    .card-rating { font-size: 13px; color: #d4a017; letter-spacing: 1px; }
-
+    .card-rating { font-size: 13px; color: #d4a017; letter-spacing: 1px; margin-bottom: 6px; }
     .edit-form { border-top: 1px solid var(--border); margin-top: 12px; padding-top: 12px; display: none; }
     .edit-form.show { display: block; }
     .edit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
-    .edit-grid input, .edit-grid select {
-      width: 100%; background: var(--bg2); border: 1px solid var(--border); border-radius: 6px;
-      padding: 7px 10px; font-family: 'Geist', sans-serif; font-size: 13px; color: var(--text); outline: none;
-    }
-    .edit-grid input:focus, .edit-grid select:focus { border-color: var(--accent); background: var(--bg); }
+    .edit-grid input, .edit-grid select { width: 100%; background: var(--bg2); border: 1px solid var(--border); border-radius: 6px; padding: 7px 10px; font-family: 'Geist', sans-serif; font-size: 13px; color: var(--text); outline: none; }
     .edit-grid .full { grid-column: 1/-1; }
-    .edit-form textarea {
-      width: 100%; background: var(--bg2); border: 1px solid var(--border); border-radius: 6px;
-      padding: 8px 10px; font-family: 'Geist', sans-serif; font-size: 13px; color: var(--text); outline: none;
-      resize: vertical; min-height: 56px; margin-bottom: 8px;
-    }
-    .edit-form textarea:focus { border-color: var(--accent); background: var(--bg); }
+    .edit-form textarea { width: 100%; background: var(--bg2); border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; font-family: 'Geist', sans-serif; font-size: 13px; color: var(--text); outline: none; resize: vertical; min-height: 56px; margin-bottom: 8px; }
     .edit-actions { display: flex; gap: 6px; justify-content: flex-end; }
-
     .empty-state { text-align: center; padding: 60px 20px; color: var(--text3); }
-    .empty-icon { font-family: 'Instrument Serif', serif; font-size: 48px; font-style: italic; color: var(--border2); margin-bottom: 12px; }
+    .empty-icon { font-family: 'Geist', sans-serif; font-size: 48px; font-style: normal; color: var(--border2); margin-bottom: 12px; }
     .empty-text { font-size: 14px; line-height: 1.6; }
-
-    /* ── Spinner ── */
-    .spinner {
-      width: 14px; height: 14px;
-      border: 2px solid var(--border);
-      border-top-color: var(--accent);
-      border-radius: 50%;
-      animation: spin 0.6s linear infinite;
-      flex-shrink: 0;
-    }
+    .spinner { width: 14px; height: 14px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.6s linear infinite; flex-shrink: 0; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ── Divider labels ── */
-    .section-label {
-      font-size: 11px;
-      color: var(--text3);
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-      padding: 4px 0 8px;
-    }
+    /* ── Stats page ── */
+    .stats-page { padding-top: 28px; }
+    .stats-header { margin-bottom: 24px; }
+    .stats-header h2 { font-family: 'Geist', sans-serif; font-size: 24px; margin-bottom: 4px; }
+    .stats-header p { font-size: 13px; color: var(--text3); }
+
+    .year-filter { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 28px; }
+
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+    .stat-card { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
+    .stat-card.full { grid-column: 1/-1; }
+    .stat-card-label { font-size: 11px; color: var(--text3); letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 6px; }
+    .stat-card-value { font-family: 'Geist', sans-serif; font-size: 32px; font-weight: 300; line-height: 1; color: var(--text); }
+    .stat-card-sub { font-size: 12px; color: var(--text2); margin-top: 4px; }
+
+    .chart-section { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 12px; }
+    .chart-title { font-size: 12px; color: var(--text3); letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 14px; }
+
+    /* bar chart */
+    .bar-chart { display: flex; flex-direction: column; gap: 8px; }
+    .bar-row { display: flex; align-items: center; gap: 10px; }
+    .bar-label { font-size: 12px; color: var(--text2); width: 90px; flex-shrink: 0; text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .bar-label.wide { width: 120px; }
+    .bar-track { flex: 1; background: var(--bg3); border-radius: 3px; height: 8px; overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: 3px; background: var(--accent); transition: width 0.4s ease; }
+    .bar-fill.gong-color { background: var(--gong); }
+    .bar-fill.jj-color { background: var(--jj); }
+    .bar-count { font-size: 12px; color: var(--text3); width: 28px; flex-shrink: 0; }
+
+    /* monthly chart */
+    .month-chart { display: flex; align-items: flex-end; gap: 6px; height: 80px; }
+    .month-col { display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; }
+    .month-bar-wrap { flex: 1; display: flex; align-items: flex-end; width: 100%; }
+    .month-bar { width: 100%; background: var(--accent); border-radius: 3px 3px 0 0; min-height: 2px; transition: height 0.4s ease; }
+    .month-bar.zero { background: var(--bg3); }
+    .month-name { font-size: 9px; color: var(--text3); letter-spacing: 0.3px; }
+    .month-num { font-size: 10px; color: var(--text2); font-weight: 500; }
+
+    /* word count buckets */
+    .wc-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+    .wc-label { font-size: 12px; color: var(--text2); width: 110px; flex-shrink: 0; }
+    .wc-track { flex: 1; background: var(--bg3); border-radius: 3px; height: 8px; overflow: hidden; }
+    .wc-fill { height: 100%; border-radius: 3px; background: var(--accent); }
+    .wc-count { font-size: 12px; color: var(--text3); width: 28px; }
+
+    /* platform donut — simple split bar */
+    .split-bar { height: 12px; border-radius: 6px; overflow: hidden; display: flex; margin-bottom: 10px; }
+    .split-seg { height: 100%; transition: width 0.4s; }
+    .split-legend { display: flex; gap: 16px; }
+    .split-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text2); }
+    .split-dot { width: 8px; height: 8px; border-radius: 50%; }
   </style>
 </head>
 <body>
 <div class="app">
 
-  <header class="header">
-    <div class="header-top">
-      <div class="logo">书架 <span>Novel Tracker</span></div>
-      <div class="stats" id="headerStats"></div>
-    </div>
-  </header>
-
-  <!-- Add via URL -->
-  <div class="add-section">
-    <div class="url-row">
-      <input class="url-input" id="urlInput" type="url"
-        placeholder="Paste a GongZiCP or JJWXC novel URL…"
-        onkeydown="if(event.key==='Enter')fetchNovel()" />
-      <button class="fetch-btn" id="fetchBtn" onclick="fetchNovel()">Fetch</button>
-    </div>
-    <div class="fetch-status" id="fetchStatus"></div>
-    <div class="preview-card" id="previewCard"></div>
+  <!-- Logo + nav -->
+  <div style="display:flex;align-items:flex-end;justify-content:space-between;padding-top:48px;margin-bottom:0">
+    <div class="logo" style="padding-bottom:10px">书架 <span>Novel Tracker</span></div>
+    <div class="hstats" id="headerStats" style="padding-bottom:14px"></div>
+  </div>
+  <div class="nav">
+    <button class="nav-tab active" onclick="showPage('library')">Library</button>
+    <button class="nav-tab" onclick="showPage('stats')">Insights</button>
   </div>
 
-  <!-- Filters -->
-  <div class="filters">
-    <input class="search-input" id="searchInput" placeholder="Search title or author…" oninput="renderList()" />
-    <div class="pill-row" id="tabPills"></div>
-    <div class="pill-row" id="platformPills"></div>
+  <!-- ── LIBRARY PAGE ── -->
+  <div class="page active" id="page-library" style="padding-top:24px">
+
+    <div class="add-section">
+      <div class="url-row">
+        <input class="url-input" id="urlInput" type="url" placeholder="Paste a GongZiCP or JJWXC novel URL…" onkeydown="if(event.key==='Enter')fetchNovel()" />
+        <button class="fetch-btn" id="fetchBtn" onclick="fetchNovel()">Fetch</button>
+      </div>
+      <div class="fetch-status" id="fetchStatus"></div>
+      <div class="preview-card" id="previewCard"></div>
+    </div>
+
+    <div class="filters">
+      <input class="search-input" id="searchInput" placeholder="Search title or author…" oninput="renderList()" />
+      <div class="pill-row" id="tabPills"></div>
+      <div class="pill-row" id="platformPills"></div>
+    </div>
+
+    <div class="novel-list" id="novelList"></div>
   </div>
 
-  <!-- List -->
-  <div class="novel-list" id="novelList"></div>
+  <!-- ── STATS PAGE ── -->
+  <div class="page" id="page-stats">
+    <div class="stats-page">
+      <div class="stats-header">
+        <h2 style="font-style:normal">Reading Insights</h2>
+        <p>Trends and patterns from your shelf</p>
+      </div>
+      <div class="pill-row year-filter" id="yearFilter"></div>
+      <div id="statsContent"></div>
+    </div>
+  </div>
 
 </div>
 
 <script>
 const API_BASE = '/api/scrape';
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
 let novels = JSON.parse(localStorage.getItem('novels_v2') || 'null');
 if (!novels) {
   novels = [
-    { id: 1, title: '谋杀官员的正确方式', author: 'priest', platform: 'jj', status: 'done', rating: 5, wordCount: '约50万字', chapterCount: '116', tags: ['古代', '玄幻', 'BL'], notes: 'Priest at her best. The political intrigue is so satisfying.', sourceUrl: '' },
-    { id: 2, title: '杀破狼', author: 'priest', platform: 'jj', status: 'done', rating: 5, wordCount: '约120万字', chapterCount: '200', tags: ['古代', '军事', 'BL'], notes: '', sourceUrl: '' },
-    { id: 3, title: '默读', author: 'priest', platform: 'jj', status: 'reading', rating: 0, wordCount: '约90万字', chapterCount: '155', tags: ['现代', '悬疑', 'BL'], notes: 'Currently on chapter 40. The slow burn is so real.', sourceUrl: '' },
+    { id: 1, title: '谋杀官员的正确方式', author: 'priest', platform: 'jj', status: 'done', rating: 5, wordCount: '约50万字', chapterCount: '116', tags: ['古代', '玄幻', 'BL'], notes: 'Priest at her best.', sourceUrl: '', dateAdded: '2024-03-15' },
+    { id: 2, title: '杀破狼', author: 'priest', platform: 'jj', status: 'done', rating: 5, wordCount: '约120万字', chapterCount: '200', tags: ['古代', '军事', 'BL'], notes: '', sourceUrl: '', dateAdded: '2024-06-20' },
+    { id: 3, title: '默读', author: 'priest', platform: 'jj', status: 'reading', rating: 0, wordCount: '约90万字', chapterCount: '155', tags: ['现代', '悬疑', 'BL'], notes: 'Slow burn is real.', sourceUrl: '', dateAdded: '2025-01-10' },
   ];
   save();
 }
 
-let tab = 'all';
-let platform = 'all';
-let editingId = null;
-let pendingRating = 0;
+let tab = 'all', platform = 'all', editingId = null, pendingRating = 0;
+let selectedYear = 'all';
+let currentPage = 'library';
 
 function save() { localStorage.setItem('novels_v2', JSON.stringify(novels)); }
 
-// ── Tabs & pills ──
-function renderControls() {
-  const tabs = [
-    { key: 'all', label: 'All' },
-    { key: 'reading', label: 'Reading' },
-    { key: 'done', label: 'Finished' },
-    { key: 'tbr', label: 'To Read' },
-  ];
-  document.getElementById('tabPills').innerHTML = tabs.map(t =>
-    `<button class="pill${tab === t.key ? ' active' : ''}" onclick="setTab('${t.key}')">${t.label}</button>`
-  ).join('');
-
-  const platforms = [
-    { key: 'all', label: 'All sources' },
-    { key: 'gong', label: 'GongZiCP' },
-    { key: 'jj', label: 'JJWXC' },
-  ];
-  document.getElementById('platformPills').innerHTML = platforms.map(p =>
-    `<button class="pill${platform === p.key ? ' active' : ''}" onclick="setPlatform('${p.key}')">${p.label}</button>`
-  ).join('');
+// ── Page navigation ──
+function showPage(p) {
+  currentPage = p;
+  document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
+  document.getElementById('page-' + p).classList.add('active');
+  document.querySelectorAll('.nav-tab').forEach((el, i) => el.classList.toggle('active', ['library','stats'][i] === p));
+  if (p === 'stats') renderStatsPage();
 }
-function setTab(t) { tab = t; renderControls(); renderList(); }
-function setPlatform(p) { platform = p; renderControls(); renderList(); }
 
 // ── Header stats ──
-function renderStats() {
+function renderHeaderStats() {
   const done = novels.filter(n => n.status === 'done').length;
   const reading = novels.filter(n => n.status === 'reading').length;
   const tbr = novels.filter(n => n.status === 'tbr').length;
   document.getElementById('headerStats').innerHTML = `
-    <div class="stat"><div class="stat-num">${done}</div><div class="stat-label">finished</div></div>
-    <div class="stat"><div class="stat-num">${reading}</div><div class="stat-label">reading</div></div>
-    <div class="stat"><div class="stat-num">${tbr}</div><div class="stat-label">to read</div></div>
+    <div class="hstat"><div class="hstat-num">${done}</div><div class="hstat-label">finished</div></div>
+    <div class="hstat"><div class="hstat-num">${reading}</div><div class="hstat-label">reading</div></div>
+    <div class="hstat"><div class="hstat-num">${tbr}</div><div class="hstat-label">to read</div></div>
   `;
 }
 
-// ── Fetch from URL ──
+// ── Library controls ──
+function renderControls() {
+  const tabs = [{key:'all',label:'All'},{key:'reading',label:'Reading'},{key:'done',label:'Finished'},{key:'tbr',label:'To Read'}];
+  document.getElementById('tabPills').innerHTML = tabs.map(t =>
+    `<button class="pill${tab===t.key?' active':''}" onclick="setTab('${t.key}')">${t.label}</button>`).join('');
+  const platforms = [{key:'all',label:'All sources'},{key:'gong',label:'GongZiCP'},{key:'jj',label:'JJWXC'}];
+  document.getElementById('platformPills').innerHTML = platforms.map(p =>
+    `<button class="pill${platform===p.key?' active':''}" onclick="setPlatform('${p.key}')">${p.label}</button>`).join('');
+}
+function setTab(t) { tab = t; renderControls(); renderList(); }
+function setPlatform(p) { platform = p; renderControls(); renderList(); }
+
+// ── Fetch ──
 async function fetchNovel() {
   const url = document.getElementById('urlInput').value.trim();
   if (!url) return;
   const btn = document.getElementById('fetchBtn');
   const status = document.getElementById('fetchStatus');
   const preview = document.getElementById('previewCard');
-
   btn.disabled = true;
   status.className = 'fetch-status';
   status.innerHTML = '<div class="spinner"></div> Fetching novel data…';
   preview.className = 'preview-card';
-
   try {
     const res = await fetch(`${API_BASE}?url=${encodeURIComponent(url)}`);
     const data = await res.json();
     if (!res.ok || !data.success) throw new Error(data.error || 'Failed to fetch');
-
     status.className = 'fetch-status success';
     status.textContent = '✓ Novel data fetched — review and save below';
     pendingRating = 0;
     showPreview(data);
   } catch (err) {
     status.className = 'fetch-status error';
-    status.textContent = '✗ ' + (err.message || 'Could not fetch. Try a different URL.');
-  } finally {
-    btn.disabled = false;
-  }
+    status.textContent = '✗ ' + (err.message || 'Could not fetch.');
+  } finally { btn.disabled = false; }
 }
 
 function showPreview(data) {
   const preview = document.getElementById('previewCard');
-  const tagsHtml = (data.tags || []).map(t => `<span class="tag-chip">${t}</span>`).join('');
+  const tagsHtml = (data.tags||[]).map(t=>`<span class="tag-chip">${t}</span>`).join('');
+  const today = new Date().toISOString().slice(0,10);
   preview.innerHTML = `
-    <div class="preview-title">${data.title || ''}</div>
+    <div class="preview-title">${data.title||''}</div>
     <div class="preview-meta">
-      <span class="badge ${data.platform}">${data.platform === 'gong' ? 'GongZiCP' : 'JJWXC'}</span>
-      ${data.author ? `<span>${data.author}</span>` : ''}
+      <span class="badge ${data.platform}">${data.platform==='gong'?'GongZiCP':'JJWXC'}</span>
+      ${data.author?`<span>${data.author}</span>`:''}
     </div>
-    ${tagsHtml ? `<div class="tags-preview">${tagsHtml}</div>` : ''}
+    ${tagsHtml?`<div class="tags-preview">${tagsHtml}</div>`:''}
     <div class="preview-fields">
-      <div class="preview-field">
-        <label>Title</label>
-        <input id="pv_title" value="${esc(data.title || '')}" />
-      </div>
-      <div class="preview-field">
-        <label>Author</label>
-        <input id="pv_author" value="${esc(data.author || '')}" />
-      </div>
-      <div class="preview-field">
-        <label>Word Count</label>
-        <input id="pv_words" value="${esc(data.wordCount || '')}" />
-      </div>
-      <div class="preview-field">
-        <label>Chapters</label>
-        <input id="pv_chapters" value="${esc(data.chapterCount || '')}" />
-      </div>
-      <div class="preview-field">
-        <label>Tags (comma-separated)</label>
-        <input id="pv_tags" class="full" value="${esc((data.tags || []).join(', '))}" />
-      </div>
-      <div class="preview-field">
-        <label>Status</label>
+      <div class="preview-field"><label>Title</label><input id="pv_title" value="${esc(data.title||'')}" /></div>
+      <div class="preview-field"><label>Author</label><input id="pv_author" value="${esc(data.author||'')}" /></div>
+      <div class="preview-field"><label>Word Count</label><input id="pv_words" value="${esc(data.wordCount||'')}" /></div>
+      <div class="preview-field"><label>Chapters</label><input id="pv_chapters" value="${esc(data.chapterCount||'')}" /></div>
+      <div class="preview-field full"><label>Tags (comma-separated)</label><input id="pv_tags" value="${esc((data.tags||[]).join(', '))}" /></div>
+      <div class="preview-field"><label>Status</label>
         <select id="pv_status">
           <option value="tbr">To Read</option>
           <option value="reading">Currently Reading</option>
           <option value="done">Finished</option>
         </select>
       </div>
+      <div class="preview-field"><label>Date Added</label><input id="pv_date" type="date" value="${today}" /></div>
     </div>
-    <div class="notes-field">
-      <label>Your Notes</label>
-      <textarea id="pv_notes" placeholder="Thoughts, favourite quotes, why you loved it…"></textarea>
-    </div>
+    <div class="notes-field"><label>Your Notes</label><textarea id="pv_notes" placeholder="Thoughts, favourite quotes, why you loved it…"></textarea></div>
     <div style="font-size:11px;color:var(--text3);margin-bottom:6px;letter-spacing:0.3px;text-transform:uppercase">Rating</div>
     <div class="star-rating" id="pv_stars">
-      ${[1,2,3,4,5].map(v => `<span class="star" data-v="${v}" onclick="setPendingRating(${v})">★</span>`).join('')}
+      ${[1,2,3,4,5].map(v=>`<span class="star" data-v="${v}" onclick="setPendingRating(${v})">★</span>`).join('')}
     </div>
     <div class="preview-actions">
       <button class="btn-ghost" onclick="closePreview()">Cancel</button>
-      <button class="btn-save" onclick="saveFromPreview('${data.platform}','${esc(data.sourceUrl || '')}')">Add to shelf</button>
-    </div>
-  `;
+      <button class="btn-save" onclick="saveFromPreview('${data.platform}','${esc(data.sourceUrl||'')}')">Add to shelf</button>
+    </div>`;
   preview.className = 'preview-card show';
 }
 
@@ -482,106 +354,89 @@ function setPendingRating(v) {
   pendingRating = v;
   document.querySelectorAll('#pv_stars .star').forEach(s => s.classList.toggle('lit', +s.dataset.v <= v));
 }
-
 function closePreview() {
   document.getElementById('previewCard').className = 'preview-card';
   document.getElementById('fetchStatus').innerHTML = '';
   document.getElementById('urlInput').value = '';
 }
-
 function saveFromPreview(platform, sourceUrl) {
-  const tags = document.getElementById('pv_tags').value.split(',').map(t => t.trim()).filter(Boolean);
+  const tags = document.getElementById('pv_tags').value.split(',').map(t=>t.trim()).filter(Boolean);
   novels.unshift({
     id: Date.now(),
     title: document.getElementById('pv_title').value.trim(),
     author: document.getElementById('pv_author').value.trim(),
-    platform,
-    status: document.getElementById('pv_status').value,
+    platform, status: document.getElementById('pv_status').value,
     rating: pendingRating,
     wordCount: document.getElementById('pv_words').value.trim(),
     chapterCount: document.getElementById('pv_chapters').value.trim(),
-    tags,
-    notes: document.getElementById('pv_notes').value.trim(),
-    sourceUrl,
+    tags, notes: document.getElementById('pv_notes').value.trim(),
+    sourceUrl, dateAdded: document.getElementById('pv_date').value,
   });
-  save();
-  closePreview();
-  render();
+  save(); closePreview(); render();
 }
 
 // ── Novel list ──
 function renderList() {
-  const q = (document.getElementById('searchInput').value || '').toLowerCase();
+  const q = (document.getElementById('searchInput').value||'').toLowerCase();
   const list = novels.filter(n => {
     if (tab !== 'all' && n.status !== tab) return false;
     if (platform !== 'all' && n.platform !== platform) return false;
-    if (q && !n.title.toLowerCase().includes(q) && !(n.author || '').toLowerCase().includes(q)) return false;
+    if (q && !n.title.toLowerCase().includes(q) && !(n.author||'').toLowerCase().includes(q)) return false;
     return true;
   });
-
   const el = document.getElementById('novelList');
   if (!list.length) {
-    el.innerHTML = `<div class="empty-state"><div class="empty-icon">空</div><div class="empty-text">${q ? 'No results found.' : 'Nothing here yet.<br>Paste a URL above to add your first novel.'}</div></div>`;
+    el.innerHTML = `<div class="empty-state"><div class="empty-icon">空</div><div class="empty-text">${q?'No results found.':'Nothing here yet.<br>Paste a URL above to add your first novel.'}</div></div>`;
     return;
   }
-
   el.innerHTML = list.map(n => novelCardHtml(n)).join('');
 }
 
 function novelCardHtml(n) {
-  const statusLabel = { done: 'Finished', reading: 'Reading', tbr: 'To Read' }[n.status] || n.status;
-  const platformLabel = n.platform === 'gong' ? 'GongZiCP' : 'JJWXC';
-  const isEditing = editingId === n.id;
-
-  const statsHtml = (n.wordCount || n.chapterCount) ? `
+  const statusLabel = {done:'Finished',reading:'Reading',tbr:'To Read'}[n.status]||n.status;
+  const platformLabel = n.platform==='gong'?'GongZiCP':'JJWXC';
+  const isEditing = editingId===n.id;
+  const statsHtml = (n.wordCount||n.chapterCount)?`
     <div class="card-stats">
-      ${n.wordCount ? `<div class="stat-item"><strong>${n.wordCount}</strong> words</div>` : ''}
-      ${n.chapterCount ? `<div class="stat-item"><strong>${n.chapterCount}</strong> chapters</div>` : ''}
-    </div>` : '';
-
-  const tagsHtml = (n.tags && n.tags.length) ? `
-    <div class="card-tags">${n.tags.map(t => `<span class="tag-chip">${t}</span>`).join('')}</div>` : '';
-
-  const notesHtml = n.notes ? `<div class="card-notes">${n.notes}</div>` : '';
-  const ratingHtml = n.rating ? `<div class="card-rating">${'★'.repeat(n.rating)}${'☆'.repeat(5 - n.rating)}</div>` : '';
-
-  const editHtml = isEditing ? `
+      ${n.wordCount?`<div class="stat-item"><strong>${n.wordCount}</strong></div>`:''}
+      ${n.chapterCount?`<div class="stat-item"><strong>${n.chapterCount}</strong> chapters</div>`:''}
+    </div>`:'';
+  const tagsHtml = (n.tags&&n.tags.length)?`<div class="card-tags">${n.tags.map(t=>`<span class="tag-chip">${t}</span>`).join('')}</div>`:'';
+  const notesHtml = n.notes?`<div class="card-notes">${n.notes}</div>`:'';
+  const ratingHtml = n.rating?`<div class="card-rating">${'★'.repeat(n.rating)}${'☆'.repeat(5-n.rating)}</div>`:'';
+  const editHtml = isEditing?`
     <div class="edit-form show">
       <div class="edit-grid">
         <div><input id="e_title_${n.id}" value="${esc(n.title)}" placeholder="Title" /></div>
-        <div><input id="e_author_${n.id}" value="${esc(n.author || '')}" placeholder="Author" /></div>
-        <div><input id="e_words_${n.id}" value="${esc(n.wordCount || '')}" placeholder="Word count" /></div>
-        <div><input id="e_chapters_${n.id}" value="${esc(n.chapterCount || '')}" placeholder="Chapters" /></div>
-        <div class="full"><input id="e_tags_${n.id}" value="${esc((n.tags || []).join(', '))}" placeholder="Tags, comma-separated" /></div>
-        <div>
-          <select id="e_platform_${n.id}">
-            <option value="gong"${n.platform === 'gong' ? ' selected' : ''}>GongZiCP</option>
-            <option value="jj"${n.platform === 'jj' ? ' selected' : ''}>JJWXC</option>
-          </select>
-        </div>
-        <div>
-          <select id="e_status_${n.id}">
-            <option value="tbr"${n.status === 'tbr' ? ' selected' : ''}>To Read</option>
-            <option value="reading"${n.status === 'reading' ? ' selected' : ''}>Reading</option>
-            <option value="done"${n.status === 'done' ? ' selected' : ''}>Finished</option>
-          </select>
-        </div>
+        <div><input id="e_author_${n.id}" value="${esc(n.author||'')}" placeholder="Author" /></div>
+        <div><input id="e_words_${n.id}" value="${esc(n.wordCount||'')}" placeholder="Word count" /></div>
+        <div><input id="e_chapters_${n.id}" value="${esc(n.chapterCount||'')}" placeholder="Chapters" /></div>
+        <div class="full"><input id="e_tags_${n.id}" value="${esc((n.tags||[]).join(', '))}" placeholder="Tags, comma-separated" /></div>
+        <div><select id="e_platform_${n.id}">
+          <option value="gong"${n.platform==='gong'?' selected':''}>GongZiCP</option>
+          <option value="jj"${n.platform==='jj'?' selected':''}>JJWXC</option>
+        </select></div>
+        <div><select id="e_status_${n.id}">
+          <option value="tbr"${n.status==='tbr'?' selected':''}>To Read</option>
+          <option value="reading"${n.status==='reading'?' selected':''}>Reading</option>
+          <option value="done"${n.status==='done'?' selected':''}>Finished</option>
+        </select></div>
+        <div class="full"><label style="font-size:11px;color:var(--text3);display:block;margin-bottom:3px">DATE ADDED</label><input id="e_date_${n.id}" type="date" value="${esc(n.dateAdded||'')}" /></div>
       </div>
-      <div style="font-size:11px;color:var(--text3);margin-bottom:4px;letter-spacing:0.3px;text-transform:uppercase">Rating</div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:4px;text-transform:uppercase">Rating</div>
       <div class="star-rating" id="e_stars_${n.id}" style="margin-bottom:10px">
-        ${[1,2,3,4,5].map(v => `<span class="star${n.rating >= v ? ' lit' : ''}" data-v="${v}" onclick="setEditRating(${n.id},${v})">★</span>`).join('')}
+        ${[1,2,3,4,5].map(v=>`<span class="star${n.rating>=v?' lit':''}" data-v="${v}" onclick="setEditRating(${n.id},${v})">★</span>`).join('')}
       </div>
-      <textarea id="e_notes_${n.id}" placeholder="Notes…">${esc(n.notes || '')}</textarea>
+      <textarea id="e_notes_${n.id}" placeholder="Notes…">${esc(n.notes||'')}</textarea>
       <div class="edit-actions">
         <button class="btn-ghost" onclick="cancelEdit()">Cancel</button>
         <button class="btn-save" onclick="saveEdit(${n.id})">Save</button>
       </div>
-    </div>` : '';
-
+    </div>`:'';
   return `
   <div class="novel-card" id="card_${n.id}">
     <div class="card-top">
-      <div class="card-title">${n.sourceUrl ? `<a href="${n.sourceUrl}" target="_blank">${n.title}</a>` : n.title}</div>
+      <div class="card-title">${n.sourceUrl?`<a href="${n.sourceUrl}" target="_blank">${n.title}</a>`:n.title}</div>
       <div class="card-actions">
         <button class="icon-btn" onclick="startEdit(${n.id})">Edit</button>
         <button class="icon-btn danger" onclick="deleteNovel(${n.id})">Delete</button>
@@ -590,49 +445,180 @@ function novelCardHtml(n) {
     <div class="card-meta">
       <span class="badge ${n.platform}">${platformLabel}</span>
       <span class="badge ${n.status}">${statusLabel}</span>
-      ${n.author ? `<span class="meta-dot"></span><span class="meta-text">${n.author}</span>` : ''}
+      ${n.author?`<span class="meta-dot"></span><span class="meta-text">${n.author}</span>`:''}
+      ${n.dateAdded?`<span class="meta-dot"></span><span class="meta-text">${n.dateAdded}</span>`:''}
     </div>
-    ${ratingHtml}
-    ${statsHtml}
-    ${tagsHtml}
-    ${notesHtml}
-    ${editHtml}
+    ${ratingHtml}${statsHtml}${tagsHtml}${notesHtml}${editHtml}
   </div>`;
 }
 
-function setEditRating(id, v) {
-  document.querySelectorAll(`#e_stars_${id} .star`).forEach(s => s.classList.toggle('lit', +s.dataset.v <= v));
-}
-function startEdit(id) { editingId = id; renderList(); }
-function cancelEdit() { editingId = null; renderList(); }
+function setEditRating(id,v) { document.querySelectorAll(`#e_stars_${id} .star`).forEach(s=>s.classList.toggle('lit',+s.dataset.v<=v)); }
+function startEdit(id) { editingId=id; renderList(); }
+function cancelEdit() { editingId=null; renderList(); }
 function saveEdit(id) {
-  const n = novels.find(n => n.id === id);
-  n.title = document.getElementById(`e_title_${id}`).value.trim() || n.title;
+  const n = novels.find(n=>n.id===id);
+  n.title = document.getElementById(`e_title_${id}`).value.trim()||n.title;
   n.author = document.getElementById(`e_author_${id}`).value.trim();
   n.wordCount = document.getElementById(`e_words_${id}`).value.trim();
   n.chapterCount = document.getElementById(`e_chapters_${id}`).value.trim();
-  n.tags = document.getElementById(`e_tags_${id}`).value.split(',').map(t => t.trim()).filter(Boolean);
+  n.tags = document.getElementById(`e_tags_${id}`).value.split(',').map(t=>t.trim()).filter(Boolean);
   n.platform = document.getElementById(`e_platform_${id}`).value;
   n.status = document.getElementById(`e_status_${id}`).value;
   n.notes = document.getElementById(`e_notes_${id}`).value.trim();
+  n.dateAdded = document.getElementById(`e_date_${id}`).value;
   const litStar = [...document.querySelectorAll(`#e_stars_${id} .star.lit`)].pop();
-  n.rating = litStar ? +litStar.dataset.v : 0;
-  save();
-  editingId = null;
-  render();
+  n.rating = litStar?+litStar.dataset.v:0;
+  save(); editingId=null; render();
 }
 function deleteNovel(id) {
   if (!confirm('Remove this novel from your shelf?')) return;
-  novels = novels.filter(n => n.id !== id);
-  save();
-  render();
+  novels = novels.filter(n=>n.id!==id); save(); render();
 }
 
-function esc(str) {
-  return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+// ── Stats page ──
+function renderStatsPage() {
+  // Build year filter
+  const years = [...new Set(novels.map(n => n.dateAdded?n.dateAdded.slice(0,4):null).filter(Boolean))].sort().reverse();
+  const yearOpts = ['all', ...years];
+  document.getElementById('yearFilter').innerHTML = yearOpts.map(y =>
+    `<button class="pill${selectedYear===y?' active':''}" onclick="setYear('${y}')">${y==='all'?'All time':y}</button>`
+  ).join('');
+
+  // Filter novels by year
+  const filtered = selectedYear === 'all' ? novels
+    : novels.filter(n => n.dateAdded && n.dateAdded.startsWith(selectedYear));
+
+  const done = filtered.filter(n => n.status === 'done');
+
+  // Word count parser — strips 字 and commas, returns number
+  function parseWC(s) {
+    if (!s) return 0;
+    const clean = s.replace(/[字,，\s]/g,'').replace('万', '0000');
+    const m = clean.match(/\d+/);
+    return m ? parseInt(m[0]) : 0;
+  }
+
+  const wcValues = done.map(n=>parseWC(n.wordCount)).filter(v=>v>0);
+  const avgWC = wcValues.length ? Math.round(wcValues.reduce((a,b)=>a+b,0)/wcValues.length) : 0;
+  const avgRatingVals = done.filter(n=>n.rating>0).map(n=>n.rating);
+  const avgRating = avgRatingVals.length ? (avgRatingVals.reduce((a,b)=>a+b,0)/avgRatingVals.length).toFixed(1) : '—';
+
+  // Monthly finished (for selected year or current year if all)
+  const yearForMonth = selectedYear === 'all' ? new Date().getFullYear().toString() : selectedYear;
+  const monthCounts = Array(12).fill(0);
+  novels.filter(n => n.status==='done' && n.dateAdded && n.dateAdded.startsWith(yearForMonth))
+    .forEach(n => { monthCounts[parseInt(n.dateAdded.slice(5,7))-1]++; });
+  const maxMonth = Math.max(...monthCounts, 1);
+
+  // Tag frequency
+  const tagFreq = {};
+  done.forEach(n => (n.tags||[]).forEach(t => { tagFreq[t]=(tagFreq[t]||0)+1; }));
+  const topTags = Object.entries(tagFreq).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const maxTag = topTags[0]?.[1]||1;
+
+  // Platform split
+  const gongCount = filtered.filter(n=>n.platform==='gong').length;
+  const jjCount = filtered.filter(n=>n.platform==='jj').length;
+  const total = gongCount + jjCount || 1;
+  const gongPct = Math.round(gongCount/total*100);
+  const jjPct = 100 - gongPct;
+
+  // Word count buckets
+  const buckets = [
+    { label: '< 100k字', min: 0, max: 100000 },
+    { label: '100–300k字', min: 100000, max: 300000 },
+    { label: '300–600k字', min: 300000, max: 600000 },
+    { label: '600k–1M字', min: 600000, max: 1000000 },
+    { label: '> 1M字', min: 1000000, max: Infinity },
+  ];
+  const bucketCounts = buckets.map(b => done.filter(n => { const v=parseWC(n.wordCount); return v>0&&v>=b.min&&v<b.max; }).length);
+  const maxBucket = Math.max(...bucketCounts, 1);
+
+  document.getElementById('statsContent').innerHTML = `
+    <!-- Key numbers -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-card-label">Novels Finished</div>
+        <div class="stat-card-value">${done.length}</div>
+        <div class="stat-card-sub">${selectedYear==='all'?'all time':selectedYear}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-label">Avg Rating</div>
+        <div class="stat-card-value">${avgRating}</div>
+        <div class="stat-card-sub">out of 5 stars</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-label">Avg Word Count</div>
+        <div class="stat-card-value" style="font-size:22px">${avgWC?avgWC.toLocaleString()+'字':'—'}</div>
+        <div class="stat-card-sub">per finished novel</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-card-label">On Shelf</div>
+        <div class="stat-card-value">${filtered.length}</div>
+        <div class="stat-card-sub">total tracked</div>
+      </div>
+    </div>
+
+    <!-- Monthly chart -->
+    <div class="chart-section">
+      <div class="chart-title">Finished by month ${selectedYear==='all'?'('+yearForMonth+')':''}</div>
+      <div class="month-chart">
+        ${monthCounts.map((c,i)=>`
+          <div class="month-col">
+            <div class="month-bar-wrap">
+              <div class="month-bar${c===0?' zero':''}" style="height:${Math.round(c/maxMonth*64)+2}px"></div>
+            </div>
+            <div class="month-name">${MONTHS[i]}</div>
+          </div>`).join('')}
+      </div>
+    </div>
+
+    <!-- Platform split -->
+    <div class="chart-section">
+      <div class="chart-title">Platform split</div>
+      <div class="split-bar">
+        <div class="split-seg" style="width:${gongPct}%;background:var(--gong)"></div>
+        <div class="split-seg" style="width:${jjPct}%;background:var(--jj)"></div>
+      </div>
+      <div class="split-legend">
+        <div class="split-item"><div class="split-dot" style="background:var(--gong)"></div>GongZiCP — ${gongCount} (${gongPct}%)</div>
+        <div class="split-item"><div class="split-dot" style="background:var(--jj)"></div>JJWXC — ${jjCount} (${jjPct}%)</div>
+      </div>
+    </div>
+
+    <!-- Top genres/tags -->
+    ${topTags.length ? `
+    <div class="chart-section">
+      <div class="chart-title">Top genres & tags (finished)</div>
+      <div class="bar-chart">
+        ${topTags.map(([tag,count])=>`
+          <div class="bar-row">
+            <div class="bar-label">${tag}</div>
+            <div class="bar-track"><div class="bar-fill" style="width:${Math.round(count/maxTag*100)}%"></div></div>
+            <div class="bar-count">${count}</div>
+          </div>`).join('')}
+      </div>
+    </div>` : ''}
+
+    <!-- Word count distribution -->
+    ${wcValues.length ? `
+    <div class="chart-section">
+      <div class="chart-title">Word count distribution (finished)</div>
+      ${buckets.map((b,i)=>`
+        <div class="wc-row">
+          <div class="wc-label">${b.label}</div>
+          <div class="wc-track"><div class="wc-fill" style="width:${Math.round(bucketCounts[i]/maxBucket*100)}%"></div></div>
+          <div class="wc-count">${bucketCounts[i]}</div>
+        </div>`).join('')}
+    </div>` : ''}
+  `;
 }
 
-function render() { renderStats(); renderControls(); renderList(); }
+function setYear(y) { selectedYear=y; renderStatsPage(); }
+
+function esc(str) { return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function render() { renderHeaderStats(); renderControls(); renderList(); }
 render();
 </script>
 </body>
