@@ -37,21 +37,23 @@ export default async function handler(req, res) {
 
 // ── GongZiCP: use their internal JSON API directly ──
 async function fetchGongZiCP(pathname, sourceUrl) {
-  // Extract novel ID from URL like /novel-1291400.html
   const idMatch = pathname.match(/novel-(\d+)/);
   if (!idMatch) throw new Error('Could not extract novel ID from URL');
   const novelId = idMatch[1];
 
   const headers = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-    'Referer': 'https://www.gongzicp.com/',
+    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36',
+    'Referer': `https://www.gongzicp.com/novel-${novelId}.html`,
     'Accept': 'application/json, text/plain, */*',
+    'Authorization': 'Basic 6ZmI5aSn5a6dOmNwMTIzNDU2',
+    'Client': 'pc',
+    'Content-Type': 'application/json',
+    'Token': 'undefined',
   };
 
-  // Fetch novel info and chapter list in parallel
   const [infoRes, chaptersRes] = await Promise.all([
-    fetch(`https://www.gongzicp.com/novelInfo?id=${novelId}`, { headers }),
-    fetch(`https://www.gongzicp.com/chapterGetList?nid=${novelId}`, { headers }),
+    fetch(`https://www.gongzicp.com/webapi/novel/novelInfo?id=${novelId}`, { headers }),
+    fetch(`https://www.gongzicp.com/webapi/novel/chapterGetList?nid=${novelId}`, { headers }),
   ]);
 
   if (!infoRes.ok) throw new Error(`GongZiCP API returned ${infoRes.status}`);
@@ -63,7 +65,6 @@ async function fetchGongZiCP(pathname, sourceUrl) {
 
   const d = infoJson.data;
 
-  // Chapter count from list
   let chapterCount = '';
   if (chaptersRes.ok) {
     const chapJson = await chaptersRes.json();
@@ -73,12 +74,10 @@ async function fetchGongZiCP(pathname, sourceUrl) {
     }
   }
 
-  // Word count — format nicely
   const wordCount = d.novel_wordnumber
     ? d.novel_wordnumber.toLocaleString('zh-CN') + '字'
     : '';
 
-  // Tags: combine type_list (genres) + tag_list
   const tags = [
     ...(d.type_list || []),
     ...(d.tag_list || []),
@@ -100,7 +99,7 @@ async function fetchGongZiCP(pathname, sourceUrl) {
 async function fetchJJWXC(url) {
   const response = await fetch(url, {
     headers: {
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36',
       'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
       'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
       'Referer': 'https://www.jjwxc.net/',
@@ -130,23 +129,21 @@ async function fetchJJWXC(url) {
     get(/作者[：:]([^<\n，,]{1,20})/) ||
     '';
 
+  // word count from itemprop="wordCount" e.g. 389931字
   const wordCount =
-    get(/文章字数：([0-9,]+)/) ||
-    get(/总推荐.*?([0-9,]+)字/) ||
+    get(/itemprop="wordCount">([^<]+)/) ||
+    get(/全文字数：<\/span><span[^>]*>([^<]+)/) ||
+    get(/文章字数：([0-9,]+字)/) ||
     '';
 
-  const chapterCount =
-    get(/共([0-9]+)个章节/) ||
-    get(/([0-9]+)章/) ||
-    '';
+  // JJWXC doesn't show total chapter count on the novel page
+  const chapterCount = '';
 
-  const tagsRaw = html.match(/class="[^"]*tag[^"]*"[^>]*>([^<]+)</g) ||
-    html.match(/\[([^\]]{2,10})\]/g) || [];
-  const tags = [...new Set(
-    tagsRaw
-      .map(t => t.replace(/class="[^"]*"[^>]*>/, '').replace(/[\[\]<].*/, '').trim())
-      .filter(t => t && t.length < 20 && t.length > 0)
-  )].slice(0, 8);
+  // Genre from itemprop="genre" — e.g. "原创-言情-近代现代-爱情"
+  const genreRaw = get(/itemprop="genre"[^>]*>\s*([^<]+)\s*</);
+  const tags = genreRaw
+    ? [...new Set(genreRaw.split('-').map(t => t.trim()).filter(t => t && t !== '原创'))]
+    : [];
 
   const cover =
     get(/<img[^>]*id="noveldefaultimage"[^>]*src="([^"]+)"/) ||
