@@ -197,6 +197,9 @@
   <div class="nav">
     <button class="nav-tab active" onclick="showPage('library')">Library</button>
     <button class="nav-tab" onclick="showPage('stats')">Insights</button>
+    <div style="flex:1"></div>
+    <button class="nav-tab" onclick="exportCSV()" title="Export to CSV">↓ Export</button>
+    <label class="nav-tab" style="cursor:pointer" title="Import from CSV">↑ Import<input type="file" accept=".csv" onchange="importCSV(event)" style="display:none"></label>
   </div>
 
   <!-- ── LIBRARY PAGE ── -->
@@ -615,6 +618,52 @@ function renderStatsPage() {
 }
 
 function setYear(y) { selectedYear=y; renderStatsPage(); }
+// ── Export CSV ──
+function exportCSV() {
+  const headers = ['title','author','platform','status','rating','wordCount','chapterCount','tags','dateAdded','notes','sourceUrl'];
+  const rows = novels.map(n => headers.map(h => {
+    const v = h === 'tags' ? (n.tags||[]).join(';') : (n[h]||'');
+    return '"' + String(v).replace(/"/g,'""') + '"';
+  }).join(','));
+  const csv = [headers.join(','), ...rows].join('\n');
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = '书架-novels-' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+}
+
+// ── Import CSV ──
+function importCSV(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    const lines = ev.target.result.split('\n').filter(l => l.trim());
+    if (lines.length < 2) return alert('CSV appears empty.');
+    const headers = lines[0].split(',').map(h => h.replace(/^"|"$/g,'').trim());
+    const imported = [];
+    for (let i = 1; i < lines.length; i++) {
+      const vals = lines[i].match(/("(?:[^"]|"")*"|[^,]*)/g).map(v => v.replace(/^"|"$/g,'').replace(/""/g,'"').trim());
+      const obj = {};
+      headers.forEach((h,j) => obj[h] = vals[j]||'');
+      if (!obj.title) continue;
+      obj.id = Date.now() + i;
+      obj.tags = obj.tags ? obj.tags.split(';').map(t=>t.trim()).filter(Boolean) : [];
+      obj.rating = parseInt(obj.rating)||0;
+      imported.push(obj);
+    }
+    if (!imported.length) return alert('No valid novels found in CSV.');
+    if (!confirm(`Import ${imported.length} novels? This will merge with your existing shelf.`)) return;
+    const existingKeys = new Set(novels.map(n => n.title + n.author));
+    const newOnes = imported.filter(n => !existingKeys.has(n.title + n.author));
+    novels = [...newOnes, ...novels];
+    save(); render();
+    alert(`Imported ${newOnes.length} new novels (${imported.length - newOnes.length} duplicates skipped).`);
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
 
 function esc(str) { return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
